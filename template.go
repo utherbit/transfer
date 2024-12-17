@@ -22,10 +22,12 @@ func (t *{{$.StructName}}Transfer) {{.Setter}}(value {{.Type}}) { t.{{$.StructNa
 `
 
 type StructInfo struct {
+	SourceFile string
 	Package    string
 	StructName string
-	Fields     []Field
-	Imports    []Import
+	// Fields only private
+	Fields  []Field
+	Imports []Import
 }
 
 type Field struct {

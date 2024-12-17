@@ -97,7 +97,8 @@ func parseStruct(sourceFile, packageName, typeName string) (StructInfo, error) {
 	var (
 		usedImports = map[string]bool{} // Импорты, которые реально используются
 		structInfo  = StructInfo{
-			Package: packageName,
+			SourceFile: sourceFile,
+			Package:    packageName,
 		}
 	)
 
