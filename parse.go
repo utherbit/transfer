@@ -95,7 +95,7 @@ func parseStruct(sourceFile, packageName, typeName string) (StructInfo, error) {
 	}
 
 	var (
-		usedImports = map[string]bool{} // Импорты, которые реально используются
+		usedImports = map[string]struct{}{} // Импорты, которые реально используются
 		structInfo  = StructInfo{
 			SourceFile: sourceFile,
 			Package:    packageName,
@@ -132,7 +132,7 @@ func parseStruct(sourceFile, packageName, typeName string) (StructInfo, error) {
 	})
 
 	for path, alias := range importsSet {
-		if usedImports[path] {
+		if _, used := usedImports[path]; used {
 			structInfo.Imports = append(structInfo.Imports, Import{Alias: alias, Path: path})
 		}
 	}
@@ -149,7 +149,7 @@ func parseStruct(sourceFile, packageName, typeName string) (StructInfo, error) {
 	return structInfo, nil
 }
 
-func formatExpr(expr ast.Expr, importMap map[string]string, usedImports map[string]bool) string {
+func formatExpr(expr ast.Expr, importMap map[string]string, usedImports map[string]struct{}) string {
 	switch t := expr.(type) {
 	case *ast.Ident:
 		return t.Name
@@ -160,11 +160,16 @@ func formatExpr(expr ast.Expr, importMap map[string]string, usedImports map[stri
 	case *ast.SelectorExpr:
 		pkgName := t.X.(*ast.Ident).Name
 		if path, ok := importMap[pkgName]; ok {
-			usedImports[path] = true // Помечаем импорт как используемый
+			usedImports[path] = struct{}{} // Помечаем импорт как используемый
 			return pkgName + "." + t.Sel.Name
 		}
 
 		return pkgName + "." + t.Sel.Name
+	case *ast.MapType:
+		key := formatExpr(t.Key, importMap, usedImports)
+		value := formatExpr(t.Value, importMap, usedImports)
+
+		return "map[" + key + "]" + value
 
 	default:
 		return fmt.Sprintf("%T", expr)
@@ -186,5 +191,9 @@ func isPrivate(name string) bool {
 }
 
 func capitalize(s string) string {
+	if strings.HasPrefix(s, "id") {
+		s = strings.Replace(s, "id", "ID", 1)
+	}
+
 	return strings.ToUpper(s[:1]) + s[1:]
 }
