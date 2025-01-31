@@ -12,7 +12,7 @@ import (
 {{- end }}
 )
 
-//go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer {{.StructName}}
+` + `//go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer {{.StructName}}
 type {{.StructName}}Transfer struct{ {{.StructName}} }
 
 func (t *{{.StructName}}Transfer) Base() {{.StructName}} { return t.{{.StructName}} }
