@@ -27,7 +27,7 @@ var RootCMD = &cobra.Command{
 
 func genTransferRun(cmd *cobra.Command, args []string) {
 	if len(args) < 1 {
-		fmt.Println("Usage: go run generate_transfer.go <type name>")
+		fmt.Println("Usage: go run generate_transfer.go <type name or reference>")
 		os.Exit(1)
 	}
 
@@ -66,7 +66,7 @@ func genTransferRun(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	fmt.Printf("Transfer file generated: %s", token.Position{Filename: outputFileName, Line: 1})
+	fmt.Printf("Transfer file generated: %s\n", token.Position{Filename: outputFileName, Line: 1})
 }
 
 func generateTransferStdout(info StructInfo) error {
