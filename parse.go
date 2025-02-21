@@ -11,10 +11,65 @@ import (
 	"strings"
 )
 
-func findFileWithType(dir, typeName string) (sourceFile string, packageName string, err error) {
+func findStructByRef(ref string) (parseReq parseRequest, err error) {
+	// parseReq := parseRequest{}
+
+	findPos, err := ParsePosition(ref)
+	if err != nil {
+		return parseReq, err
+	}
+
+	parseReq.Filename = findPos.Filename
+	// token.Position{}()
+
+	fset := token.NewFileSet()
+	node, err := parser.ParseFile(fset, findPos.Filename, nil, parser.AllErrors)
+	if err != nil {
+		return parseReq, err
+	}
+
+	ast.Inspect(node, func(n ast.Node) bool {
+		if n == nil {
+			return true
+		}
+
+		// Проверяем, находится ли узел на нужной строке
+		pos := fset.Position(n.Pos())
+		if pos.Line == findPos.Line {
+			switch t := n.(type) {
+			case *ast.TypeSpec:
+				// Если это спецификация типа, то возвращаем имя типа
+				parseReq.StructName = t.Name.Name
+
+				return false
+			case *ast.StructType:
+				// Если это структура, то возвращаем имя типа, если оно есть
+				if ident, ok := n.(*ast.Ident); ok {
+					parseReq.StructName = ident.Name
+
+					return false
+				}
+			}
+		}
+
+		return true
+	})
+
+	if parseReq.StructName == "" {
+		return parseReq, fmt.Errorf("type not found in package %s", parseReq.Filename)
+	}
+
+	return parseReq, nil
+}
+
+func findStructByDirAndType(dir, typeName string) (parseRequest, error) {
 	fset := token.NewFileSet()
 
-	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	parseReq := parseRequest{
+		StructName: typeName,
+	}
+
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -28,7 +83,7 @@ func findFileWithType(dir, typeName string) (sourceFile string, packageName stri
 			return err
 		}
 
-		packageName = node.Name.Name
+		// packageName = node.Name.Name
 
 		node, err = parser.ParseFile(fset, path, nil, parser.AllErrors)
 		if err != nil {
@@ -48,7 +103,7 @@ func findFileWithType(dir, typeName string) (sourceFile string, packageName stri
 				}
 
 				// FIND!
-				sourceFile = path
+				parseReq.Filename = path
 
 				return filepath.SkipAll
 			}
@@ -57,21 +112,21 @@ func findFileWithType(dir, typeName string) (sourceFile string, packageName stri
 		return nil
 	})
 	if err != nil {
-		return "", "", err
+		return parseReq, err
 	}
 
-	if sourceFile == "" {
-		return "", "", fmt.Errorf("type %s not found in package %s", typeName, dir)
+	if parseReq.Filename == "" {
+		return parseReq, fmt.Errorf("type %s not found in package %s", typeName, dir)
 	}
 
-	return sourceFile, packageName, nil
+	return parseReq, nil
 }
 
 //nolint:funlen
-func parseStruct(sourceFile, packageName, typeName string) (StructInfo, error) {
+func parseStruct(req parseRequest) (StructInfo, error) {
 	fset := token.NewFileSet()
 
-	node, err := parser.ParseFile(fset, sourceFile, nil, parser.AllErrors)
+	node, err := parser.ParseFile(fset, req.Filename, nil, parser.AllErrors)
 	if err != nil {
 		return StructInfo{}, err
 	}
@@ -97,14 +152,16 @@ func parseStruct(sourceFile, packageName, typeName string) (StructInfo, error) {
 	var (
 		usedImports = map[string]struct{}{} // Импорты, которые реально используются
 		structInfo  = StructInfo{
-			SourceFile: sourceFile,
-			Package:    packageName,
+			SourceFile: req.Filename,
+			StructName: req.StructName,
+			Package:    node.Name.Name,
 		}
+		find = false
 	)
 
 	ast.Inspect(node, func(n ast.Node) bool {
 		ts, ok := n.(*ast.TypeSpec)
-		if !ok || ts.Name.Name != typeName {
+		if !ok || ts.Name.Name != req.StructName {
 			return true
 		}
 
@@ -113,7 +170,7 @@ func parseStruct(sourceFile, packageName, typeName string) (StructInfo, error) {
 			return true
 		}
 
-		structInfo.StructName = ts.Name.Name
+		find = true
 
 		for _, field := range st.Fields.List {
 			if field.Names != nil && isPrivate(field.Names[0].Name) {
@@ -131,6 +188,10 @@ func parseStruct(sourceFile, packageName, typeName string) (StructInfo, error) {
 		return false
 	})
 
+	if !find {
+		return StructInfo{}, fmt.Errorf("structure %s not found in %s", req.StructName, req.Filename)
+	}
+
 	for path, alias := range importsSet {
 		if _, used := usedImports[path]; used {
 			structInfo.Imports = append(structInfo.Imports, Import{Alias: alias, Path: path})
@@ -141,10 +202,6 @@ func parseStruct(sourceFile, packageName, typeName string) (StructInfo, error) {
 	sort.Slice(structInfo.Imports, func(i, j int) bool {
 		return structInfo.Imports[i].Path < structInfo.Imports[j].Path
 	})
-
-	if structInfo.StructName == "" {
-		return StructInfo{}, fmt.Errorf("structure %s not found in %s", typeName, sourceFile)
-	}
 
 	return structInfo, nil
 }

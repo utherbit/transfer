@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go/token"
 	"io"
 	"os"
 	"strings"
@@ -30,23 +31,42 @@ func genTransferRun(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	typeName := args[len(args)-1]
+	arg := args[len(args)-1]
 
-	currentDir, err := os.Getwd()
+	isRef := strings.Contains(arg, ":")
+
+	var (
+		parseReq parseRequest
+		err      error
+	)
+
+	if isRef {
+		parseReq, err = findStructByRef(arg)
+	} else {
+		currentDir, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+
+		parseReq, err = findStructByDirAndType(currentDir, arg)
+	}
+
 	if err != nil {
 		panic(err)
 	}
 
-	info, err := parseType(currentDir, typeName)
+	info, err := parseStruct(parseReq)
 	if err != nil {
 		panic(err)
 	}
 
 	outputFileName := strings.TrimSuffix(info.SourceFile, ".go") + "_transfer.go"
 
-	if err = generateTransferFileOut(*info, outputFileName); err != nil {
+	if err = generateTransferFileOut(info, outputFileName); err != nil {
 		panic(err)
 	}
+
+	fmt.Printf("Transfer file generated: %s", token.Position{Filename: outputFileName, Line: 1})
 }
 
 func generateTransferStdout(info StructInfo) error {
@@ -64,20 +84,6 @@ func generateTransferFileOut(info StructInfo, fileName string) error {
 	return generateTransfer(info, file)
 }
 
-func parseType(currentDir, typeName string) (*StructInfo, error) {
-	sourceFile, packageName, err := findFileWithType(currentDir, typeName)
-	if err != nil {
-		return nil, err
-	}
-
-	structInfo, err := parseStruct(sourceFile, packageName, typeName)
-	if err != nil {
-		return nil, err
-	}
-
-	return &structInfo, nil
-}
-
 func generateTransfer(info StructInfo, output io.Writer) error {
 	tmpl, err := template.New("transfer").Parse(transferTemplate)
 	if err != nil {
@@ -90,4 +96,9 @@ func generateTransfer(info StructInfo, output io.Writer) error {
 	}
 
 	return nil
+}
+
+type parseRequest struct {
+	Filename   string
+	StructName string
 }

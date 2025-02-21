@@ -97,3 +97,9 @@ func TestCapitalize(t *testing.T) {
 		})
 	}
 }
+
+func Test_findFileByRef(t *testing.T) {
+	_, err := findStructByRef("./../../../internal/integrations/iiko/internal/domain/terminal/brand_settings.go:5")
+
+	require.NoError(t, err)
+}
