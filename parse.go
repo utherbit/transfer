@@ -203,6 +203,9 @@ func formatExpr(expr ast.Expr, importMap map[string]string, usedImports map[stri
 	case *ast.Ident:
 		return t.Name
 
+	case *ast.BasicLit:
+		return t.Value
+
 	case *ast.StarExpr:
 		return "*" + formatExpr(t.X, importMap, usedImports)
 
@@ -220,8 +223,18 @@ func formatExpr(expr ast.Expr, importMap map[string]string, usedImports map[stri
 
 		return "map[" + key + "]" + value
 
+	case *ast.ArrayType:
+		items := formatExpr(t.Elt, importMap, usedImports)
+		arrayLen := ""
+
+		if t.Len != nil {
+			arrayLen = formatExpr(t.Len, importMap, usedImports)
+		}
+
+		return "[" + arrayLen + "]" + items
+
 	default:
-		return fmt.Sprintf("%T", expr)
+		panic(fmt.Sprintf("unsupported type: %T", expr))
 	}
 }
 
