@@ -23,6 +23,7 @@ func TestParsePosition(t *testing.T) {
 		{"lineNaN", args{ref: "example/directory:NaN"}, token.Position{Filename: "example/directory"}, true},
 		{"colNaN", args{ref: "example/directory:1:NaN"}, token.Position{Filename: "example/directory", Line: 1}, true},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotR, err := ParsePosition(tt.args.ref)
@@ -30,8 +31,34 @@ func TestParsePosition(t *testing.T) {
 				t.Errorf("ParseGoRef() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if !reflect.DeepEqual(gotR, tt.wantR) {
 				t.Errorf("ParseGoRef() gotR = %v, want %v", gotR, tt.wantR)
+			}
+		})
+	}
+}
+
+func Test_isValidGoFilePosition(t *testing.T) {
+	tests := []struct {
+		name string
+		s    string
+		want bool
+	}{
+		{"Valid full position", "file.go:10:5", true},
+		{"Valid position without column", "file.go:10", true},
+		{"Invalid file extension", "file.txt:10:5", false},
+		{"Missing filename", "10:5", false},
+		{"Only line number", "10", false},
+		{"No numbers", "file.go", false},
+		{"Invalid format", "-", false},
+		{"Non-numeric line", "file.go:abc", false},
+		{"Non-numeric column", "file.go:10:xyz", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isValidGoFilePosition(tt.s); got != tt.want {
+				t.Errorf("isValidGoFilePosition() = %v, want %v", got, tt.want)
 			}
 		})
 	}

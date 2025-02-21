@@ -3,9 +3,17 @@ package main
 import (
 	"errors"
 	"go/token"
+	"regexp"
 	"strconv"
 	"strings"
 )
+
+func isValidGoFilePosition(s string) bool {
+	// Регулярное выражение для проверки формата "file.go:line:column" или "file.go:line"
+	pattern := `^[^:\n]+\.go:\d+(?::\d+)?$`
+	re := regexp.MustCompile(pattern)
+	return re.MatchString(s)
+}
 
 func ParsePosition(ref string) (pos token.Position, err error) {
 	items := strings.Split(ref, ":")

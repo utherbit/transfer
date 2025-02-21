@@ -12,8 +12,6 @@ import (
 )
 
 func findStructByRef(ref string) (parseReq parseRequest, err error) {
-	// parseReq := parseRequest{}
-
 	findPos, err := ParsePosition(ref)
 	if err != nil {
 		return parseReq, err
@@ -23,6 +21,7 @@ func findStructByRef(ref string) (parseReq parseRequest, err error) {
 	// token.Position{}()
 
 	fset := token.NewFileSet()
+
 	node, err := parser.ParseFile(fset, findPos.Filename, nil, parser.AllErrors)
 	if err != nil {
 		return parseReq, err
@@ -78,14 +77,7 @@ func findStructByDirAndType(dir, typeName string) (parseRequest, error) {
 			return nil
 		}
 
-		node, err := parser.ParseFile(fset, path, nil, parser.PackageClauseOnly)
-		if err != nil {
-			return err
-		}
-
-		// packageName = node.Name.Name
-
-		node, err = parser.ParseFile(fset, path, nil, parser.AllErrors)
+		node, err := parser.ParseFile(fset, path, nil, parser.AllErrors)
 		if err != nil {
 			return err
 		}

@@ -33,21 +33,18 @@ func genTransferRun(cmd *cobra.Command, args []string) {
 
 	arg := args[len(args)-1]
 
-	isRef := strings.Contains(arg, ":")
-
 	var (
 		parseReq parseRequest
 		err      error
 	)
 
-	if isRef {
+	if isValidGoFilePosition(arg) {
 		parseReq, err = findStructByRef(arg)
 	} else {
-		currentDir, err := os.Getwd()
-		if err != nil {
-			panic(err)
+		currentDir, errWd := os.Getwd()
+		if errWd != nil {
+			panic(errWd)
 		}
-
 		parseReq, err = findStructByDirAndType(currentDir, arg)
 	}
 
