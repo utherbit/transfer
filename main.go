@@ -20,12 +20,19 @@ func main() {
 }
 
 var RootCMD = &cobra.Command{
-	Use:   "transfer",
-	Short: "Generate transfer type",
-	Run:   genTransferRun,
+	Use:        "transfer {type name} | {reference}",
+	Args:       cobra.ExactArgs(1),
+	SuggestFor: []string{"te", "fe", "re"},
+	Short:      `Generate transfer type`,
+	Long: `use command like this:
+go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer <type name> // from working directory
+go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer <reference> // from project root directory
+`,
+
+	Run: run,
 }
 
-func genTransferRun(cmd *cobra.Command, args []string) {
+func run(cmd *cobra.Command, args []string) {
 	if len(args) < 1 {
 		fmt.Println("Usage: go run generate_transfer.go <type name or reference>")
 		os.Exit(1)
