@@ -63,3 +63,10 @@ func Test_isValidGoFilePosition(t *testing.T) {
 		})
 	}
 }
+
+func Benchmark_isValidGoFilePosition(b *testing.B) {
+	const ref = "file.go:10:5"
+	for i := 0; i < b.N; i++ {
+		isValidGoFilePosition(ref)
+	}
+}

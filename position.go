@@ -3,16 +3,23 @@ package main
 import (
 	"errors"
 	"go/token"
-	"regexp"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
 
+// Регулярное выражение для проверки формата "file.go:line:column" или "file.go:line"
 func isValidGoFilePosition(s string) bool {
-	// Регулярное выражение для проверки формата "file.go:line:column" или "file.go:line"
-	pattern := `^[^:\n]+\.go:\d+(?::\d+)?$`
-	re := regexp.MustCompile(pattern)
-	return re.MatchString(s)
+	pos, err := ParsePosition(s)
+	if err != nil {
+		return false
+	}
+
+	if filepath.Ext(pos.Filename) != ".go" {
+		return false
+	}
+
+	return pos.IsValid()
 }
 
 func ParsePosition(ref string) (pos token.Position, err error) {
