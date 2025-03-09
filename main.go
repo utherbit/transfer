@@ -11,6 +11,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	reference string
+	typeName  string
+)
+
+var RootCMD = &cobra.Command{
+	Use:        "transfer --type T",
+	SuggestFor: []string{"te", "fe", "re"},
+	Short:      `Generate transfer type`,
+	Long: `use command like this:
+go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type <type name> // from working directory
+go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --ref <reference> // from project root directory
+`,
+
+	Run: run,
+}
+
 func main() {
 	RootCMD.SetArgs(os.Args[1:])
 
@@ -19,41 +36,50 @@ func main() {
 	}
 }
 
-var RootCMD = &cobra.Command{
-	Use:        "transfer {type name} | {reference}",
-	Args:       cobra.ExactArgs(1),
-	SuggestFor: []string{"te", "fe", "re"},
-	Short:      `Generate transfer type`,
-	Long: `use command like this:
-go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer <type name> // from working directory
-go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer <reference> // from project root directory
-`,
-
-	Run: run,
+func init() {
+	RootCMD.Flags().StringVarP(&typeName, "type", "t", typeName,
+		"Название типа, указывается при вызове из директории в которой находиться указанный тип.")
+	RootCMD.Flags().StringVarP(&reference, "ref", "r", reference,
+		"Ссылка на тип, указывается из любой директории, reference должен включать в себя путь до .go файла и строку на которой находиться нужный тип.")
 }
 
 func run(cmd *cobra.Command, args []string) {
-	if len(args) < 1 {
-		fmt.Println("Usage: go run generate_transfer.go <type name or reference>")
-		os.Exit(1)
-	}
-
-	arg := args[len(args)-1]
+	//if len(args) < 1 {
+	//	fmt.Println("Usage: go run generate_transfer.go <type name or reference>")
+	//	os.Exit(1)
+	//}
+	//
+	//arg := args[len(args)-1]
 
 	var (
 		parseReq parseRequest
 		err      error
 	)
 
-	if isValidGoFilePosition(arg) {
-		parseReq, err = findStructByRef(arg)
-	} else {
+	switch {
+	case reference != "":
+		parseReq, err = findStructByRef(reference)
+
+	case typeName != "":
 		currentDir, errWd := os.Getwd()
 		if errWd != nil {
 			panic(errWd)
 		}
-		parseReq, err = findStructByDirAndType(currentDir, arg)
+		parseReq, err = findStructByDirAndType(currentDir, typeName)
+
+	default:
+		fmt.Println("Должен быть обязательно передан один из флагов: type, ref'")
 	}
+
+	//if isValidGoFilePosition(arg) {
+	//	parseReq, err = findStructByRef(arg)
+	//} else {
+	//	currentDir, errWd := os.Getwd()
+	//	if errWd != nil {
+	//		panic(errWd)
+	//	}
+	//	parseReq, err = findStructByDirAndType(currentDir, arg)
+	//}
 
 	if err != nil {
 		panic(err)
