@@ -1,4 +1,4 @@
-package case1
+package example
 
 type Entity struct {
 	ID   int
