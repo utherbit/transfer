@@ -1,7 +1,9 @@
 package internal
 
 import (
+	"bytes"
 	"fmt"
+	"go/format"
 	"go/token"
 	"io"
 	"os"
@@ -9,6 +11,7 @@ import (
 	"text/template"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/tools/imports"
 )
 
 func run(cmd *cobra.Command, args []string) {
@@ -72,7 +75,35 @@ func generateTransfer(info StructInfo, output io.Writer) error {
 		return err
 	}
 
-	err = tmpl.Execute(output, info)
+	buf := bytes.NewBuffer(make([]byte, 0))
+
+	if err = tmpl.Execute(buf, info); err != nil {
+		return err
+	}
+
+	transfer, err := io.ReadAll(buf)
+	if err != nil {
+		return err
+	}
+
+	// fmt formating
+	fmtTransfer, err := format.Source(transfer)
+	if err != nil {
+		return err
+	}
+
+	// imports formating
+	fmtTransfer, err = imports.Process("", fmtTransfer, &imports.Options{
+		Comments:   true,
+		TabIndent:  true,
+		TabWidth:   8,
+		FormatOnly: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = output.Write(fmtTransfer)
 	if err != nil {
 		return err
 	}

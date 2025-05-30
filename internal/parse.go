@@ -124,7 +124,8 @@ func parseStruct(req parseRequest) (StructInfo, error) {
 	}
 
 	var (
-		importMap  = map[string]string{}
+		importMap = map[string]string{}
+		// todo при импорте одного и того же пакета под разными псевдонимами генерируется не компилируемый код.
 		importsSet = map[string]string{} // Путь -> Псевдоним
 	)
 
@@ -165,7 +166,7 @@ func parseStruct(req parseRequest) (StructInfo, error) {
 		find = true
 
 		for _, field := range st.Fields.List {
-			if field.Names != nil && isPrivate(field.Names[0].Name) {
+			if field.Names != nil /*&& isPrivate(field.Names[0].Name) */ {
 				fieldType := formatExpr(field.Type, importMap, usedImports)
 				fieldName := field.Names[0].Name
 				structInfo.Fields = append(structInfo.Fields, Field{
@@ -246,10 +247,6 @@ func aliasOrDefault(alias, path string) string {
 	parts := strings.Split(path, "/")
 
 	return parts[len(parts)-1]
-}
-
-func isPrivate(name string) bool {
-	return strings.ToLower(string(name[0])) == string(name[0])
 }
 
 func capitalize(s string) string {

@@ -22,6 +22,10 @@ func walkTestdata(t *testing.T, dir string) {
 	require.NoError(t, err)
 
 	for _, e := range entry {
+		if !e.IsDir() {
+			continue
+		}
+
 		dir := filepath.Join(dir, e.Name())
 
 		if thisDirIsTestCase(t, dir) {
@@ -29,9 +33,7 @@ func walkTestdata(t *testing.T, dir string) {
 			continue
 		}
 
-		if e.IsDir() {
-			walkTestdata(t, dir)
-		}
+		walkTestdata(t, dir)
 	}
 }
 
@@ -59,6 +61,7 @@ func thisDirIsTestCase(t *testing.T, dir string) bool {
 func RunTestCase(t *testing.T, dir string) {
 	transferPath, _ := url.JoinPath(dir, "entity_transfer.go")
 	transferFile, err := os.Open(transferPath)
+	require.NoError(t, err)
 
 	transferExpect, err := io.ReadAll(transferFile)
 	require.NoError(t, err)
@@ -76,5 +79,8 @@ func RunTestCase(t *testing.T, dir string) {
 		require.NoError(t, err)
 
 		require.Equal(t, string(transferExpect), buf.String())
+		//if string(transferExpect) != buf.String() {
+		//	t.Errorf("got:\n%s\n\nwant:\n%s\n", buf.String(), string(transferExpect))
+		//}
 	})
 }

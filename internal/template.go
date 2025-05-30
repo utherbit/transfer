@@ -18,14 +18,29 @@ import (
 
 {{ end -}}
 
-` + `//go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type {{.StructName}}
-type {{.StructName}}Transfer struct{ {{.StructName}} }
+` + /*
+		Экранирование для избежания ложного срабатывания go:generate
+	*/`//go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type {{.StructName}}
+type {{.StructName}}Transfer struct { 
+{{- range .Fields}}
+	{{.PubName}} {{.Type}}
+{{- end }}
+}
 
-func (t *{{.StructName}}Transfer) Base() {{.StructName}} { return t.{{.StructName}} }
-{{range .Fields}}
-func (t *{{$.StructName}}Transfer) {{.PubName}}() {{.Type}}         { return t.{{$.StructName}}.{{.Name}} }
-func (t *{{$.StructName}}Transfer) Set{{.PubName}}(value {{.Type}}) { t.{{$.StructName}}.{{.Name}} = value }
-{{ end -}}
+func (t *{{.StructName}}Transfer) Init(entity {{.StructName}}) { 
+{{- range .Fields}}
+	t.{{ .PubName }} = entity.{{ .Name }}
+{{- end }}
+}
+
+func (t {{.StructName}}Transfer) Base() {{.StructName}} {
+	return {{ .StructName }}{
+{{- range .Fields}}
+		{{ .Name }}: t.{{.PubName}},
+{{- end }}
+	}
+}
+
 `
 
 type StructInfo struct {
