@@ -53,10 +53,8 @@ type StructInfo struct {
 }
 
 type Field struct {
-	Name   string
-	Type   string
-	Getter string
-	Setter string
+	Name string
+	Type string
 }
 
 func (f *Field) PubName() string {

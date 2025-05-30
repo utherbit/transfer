@@ -7,13 +7,13 @@ import (
 	aliasImport "os"
 
 	"github.com/stretchr/testify/mock"
-	"klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer/internal/testdata/withImports/localimport"
+	"klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer/internal/testdata/withImports/pac"
 )
 
 //go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type Entity
 type EntityDTO struct {
 	ExternalImport *mock.Mock
-	InternalImport localimport.LocalType
+	InternalImport pac.LocalType
 	StdLibImport   io.Reader
 	AliasImport    aliasImport.DirEntry
 }

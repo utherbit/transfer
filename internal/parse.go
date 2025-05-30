@@ -166,16 +166,37 @@ func parseStruct(req parseRequest) (StructInfo, error) {
 		find = true
 
 		for _, field := range st.Fields.List {
-			if field.Names != nil /*&& isPrivate(field.Names[0].Name) */ {
-				fieldType := formatExpr(field.Type, importMap, usedImports)
-				fieldName := field.Names[0].Name
+			// if field.Names != nil /*&& isPrivate(field.Names[0].Name) */ {
+
+			fieldType := formatExpr(field.Type, importMap, usedImports)
+			// Если поля указаны одной строкой через запятую,
+			// Names будет содержать несколько элементов
+			// в dto они будут записаны как отдельные поля
+			for _, fieldName := range field.Names {
 				structInfo.Fields = append(structInfo.Fields, Field{
-					Name:   fieldName,
-					Type:   fieldType,
-					Getter: capitalize(fieldName),
-					Setter: "Set" + capitalize(fieldName),
+					Name: fieldName.Name,
+					Type: fieldType,
 				})
 			}
+			// nameless field
+			if len(field.Names) == 0 {
+				fieldName := strings.TrimPrefix(fieldType, "*")
+				// generic?
+				if strings.Contains(fieldName, "[") {
+					fieldName = strings.Split(fieldName, "[")[0]
+				}
+				// import?
+				if strings.Contains(fieldName, ".") {
+					parts := strings.Split(fieldName, ".")
+					fieldName = parts[len(parts)-1]
+				}
+				structInfo.Fields = append(structInfo.Fields, Field{
+					Name: fieldName,
+					Type: fieldType,
+				})
+			}
+
+			//}
 		}
 
 		return false
@@ -200,6 +221,10 @@ func parseStruct(req parseRequest) (StructInfo, error) {
 }
 
 func formatExpr(expr ast.Expr, importMap map[string]string, usedImports map[string]struct{}) string {
+	//err := printer.Fprint(&buf, token.NewFileSet(), field.Type)
+	//if err != nil {
+	//	return true
+	//}
 	switch t := expr.(type) {
 	case *ast.Ident:
 		return t.Name
@@ -233,6 +258,21 @@ func formatExpr(expr ast.Expr, importMap map[string]string, usedImports map[stri
 		}
 
 		return "[" + arrayLen + "]" + items
+
+	case *ast.IndexExpr:
+		x := formatExpr(t.X, importMap, usedImports)
+		index := formatExpr(t.Index, importMap, usedImports)
+
+		return x + "[" + index + "]"
+
+	case *ast.IndexListExpr:
+		x := formatExpr(t.X, importMap, usedImports)
+		indexList := make([]string, 0, len(t.Indices))
+		for _, index := range t.Indices {
+			indexList = append(indexList, formatExpr(index, importMap, usedImports))
+		}
+
+		return x + "[" + strings.Join(indexList, ", ") + "]"
 
 	default:
 		panic(fmt.Sprintf("unsupported type: %T", expr))

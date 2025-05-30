@@ -1,3 +1,3 @@
-package localimport
+package pac
 
 type LocalType struct{}

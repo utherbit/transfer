@@ -79,8 +79,5 @@ func RunTestCase(t *testing.T, dir string) {
 		require.NoError(t, err)
 
 		require.Equal(t, string(transferExpect), buf.String())
-		//if string(transferExpect) != buf.String() {
-		//	t.Errorf("got:\n%s\n\nwant:\n%s\n", buf.String(), string(transferExpect))
-		//}
 	})
 }

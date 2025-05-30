@@ -5,13 +5,17 @@ type Entity struct {
 	sliceField []any
 	arrayField [1]any
 
-	structTypeField structType
-	// Unsupported types:
-	// genericField genericType[any]
+	structTypeField Struct
+
+	genericField  GStruct[any]
+	generic2Field G2Struct[any, any]
+
+	// unsupported
 	// structField struct{}
 }
 
 type (
-	structType         struct{ Field any }
-	genericType[T any] struct{ Type T }
+	Struct               struct{}
+	GStruct[T any]       struct{}
+	G2Struct[T1, T2 any] struct{}
 )

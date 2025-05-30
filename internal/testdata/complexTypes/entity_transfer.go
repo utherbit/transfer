@@ -7,7 +7,9 @@ type EntityDTO struct {
 	MapField        map[string]any
 	SliceField      []any
 	ArrayField      [1]any
-	StructTypeField structType
+	StructTypeField Struct
+	GenericField    GStruct[any]
+	Generic2Field   G2Struct[any, any]
 }
 
 func (t *EntityDTO) Init(entity Entity) {
@@ -15,6 +17,8 @@ func (t *EntityDTO) Init(entity Entity) {
 	t.SliceField = entity.sliceField
 	t.ArrayField = entity.arrayField
 	t.StructTypeField = entity.structTypeField
+	t.GenericField = entity.genericField
+	t.Generic2Field = entity.generic2Field
 }
 
 func (t EntityDTO) Base() Entity {
@@ -23,5 +27,7 @@ func (t EntityDTO) Base() Entity {
 		sliceField:      t.SliceField,
 		arrayField:      t.ArrayField,
 		structTypeField: t.StructTypeField,
+		genericField:    t.GenericField,
+		generic2Field:   t.Generic2Field,
 	}
 }
