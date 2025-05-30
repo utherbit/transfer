@@ -21,19 +21,19 @@ import (
 ` + /*
 		Экранирование для избежания ложного срабатывания go:generate
 	*/`//go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type {{.StructName}}
-type {{.StructName}}Transfer struct { 
+type {{.StructName}}DTO struct { 
 {{- range .Fields}}
 	{{.PubName}} {{.Type}}
 {{- end }}
 }
 
-func (t *{{.StructName}}Transfer) Init(entity {{.StructName}}) { 
+func (t *{{.StructName}}DTO) Init(entity {{.StructName}}) { 
 {{- range .Fields}}
 	t.{{ .PubName }} = entity.{{ .Name }}
 {{- end }}
 }
 
-func (t {{.StructName}}Transfer) Base() {{.StructName}} {
+func (t {{.StructName}}DTO) Base() {{.StructName}} {
 	return {{ .StructName }}{
 {{- range .Fields}}
 		{{ .Name }}: t.{{.PubName}},
