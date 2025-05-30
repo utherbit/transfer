@@ -3,17 +3,17 @@
 package example
 
 //go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type Entity
-type EntityTransfer struct {
+type EntityDTO struct {
 	ID   int
 	Name string
 }
 
-func (t *EntityTransfer) Init(entity Entity) {
+func (t *EntityDTO) Init(entity Entity) {
 	t.ID = entity.ID
 	t.Name = entity.name
 }
 
-func (t EntityTransfer) Base() Entity {
+func (t EntityDTO) Base() Entity {
 	return Entity{
 		ID:   t.ID,
 		name: t.Name,

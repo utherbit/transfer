@@ -3,15 +3,15 @@
 package ignoreUnderscore
 
 //go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type Entity
-type EntityTransfer struct {
+type EntityDTO struct {
 	_ignorableField int
 }
 
-func (t *EntityTransfer) Init(entity Entity) {
+func (t *EntityDTO) Init(entity Entity) {
 	t._ignorableField = entity._ignorableField
 }
 
-func (t EntityTransfer) Base() Entity {
+func (t EntityDTO) Base() Entity {
 	return Entity{
 		_ignorableField: t._ignorableField,
 	}

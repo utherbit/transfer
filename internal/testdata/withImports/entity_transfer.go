@@ -11,21 +11,21 @@ import (
 )
 
 //go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type Entity
-type EntityTransfer struct {
+type EntityDTO struct {
 	ExternalImport *mock.Mock
 	InternalImport localimport.LocalType
 	StdLibImport   io.Reader
 	AliasImport    aliasImport.DirEntry
 }
 
-func (t *EntityTransfer) Init(entity Entity) {
+func (t *EntityDTO) Init(entity Entity) {
 	t.ExternalImport = entity.externalImport
 	t.InternalImport = entity.internalImport
 	t.StdLibImport = entity.stdLibImport
 	t.AliasImport = entity.aliasImport
 }
 
-func (t EntityTransfer) Base() Entity {
+func (t EntityDTO) Base() Entity {
 	return Entity{
 		externalImport: t.ExternalImport,
 		internalImport: t.InternalImport,

@@ -3,21 +3,21 @@
 package complexTypes
 
 //go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type Entity
-type EntityTransfer struct {
+type EntityDTO struct {
 	MapField        map[string]any
 	SliceField      []any
 	ArrayField      [1]any
 	StructTypeField structType
 }
 
-func (t *EntityTransfer) Init(entity Entity) {
+func (t *EntityDTO) Init(entity Entity) {
 	t.MapField = entity.mapField
 	t.SliceField = entity.sliceField
 	t.ArrayField = entity.arrayField
 	t.StructTypeField = entity.structTypeField
 }
 
-func (t EntityTransfer) Base() Entity {
+func (t EntityDTO) Base() Entity {
 	return Entity{
 		mapField:        t.MapField,
 		sliceField:      t.SliceField,

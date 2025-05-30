@@ -3,7 +3,7 @@
 package simpleTypes
 
 //go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type Entity
-type EntityTransfer struct {
+type EntityDTO struct {
 	ID              int
 	Name            string
 	IntField        int
@@ -26,7 +26,7 @@ type EntityTransfer struct {
 	RuneField       rune
 }
 
-func (t *EntityTransfer) Init(entity Entity) {
+func (t *EntityDTO) Init(entity Entity) {
 	t.ID = entity.ID
 	t.Name = entity.name
 	t.IntField = entity.intField
@@ -49,7 +49,7 @@ func (t *EntityTransfer) Init(entity Entity) {
 	t.RuneField = entity.runeField
 }
 
-func (t EntityTransfer) Base() Entity {
+func (t EntityDTO) Base() Entity {
 	return Entity{
 		ID:              t.ID,
 		name:            t.Name,
