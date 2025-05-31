@@ -1,7 +1,7 @@
 package embeddedStruct
 
 import (
-	"klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer/internal/testdata/embeddedStruct/pac"
+	"github.com/utherbit/transfer/internal/testdata/embeddedStruct/pac"
 )
 
 type Entity struct {

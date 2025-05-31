@@ -3,7 +3,7 @@
 package embeddedStruct
 
 import (
-	"klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer/internal/testdata/embeddedStruct/pac"
+	"github.com/utherbit/transfer/internal/testdata/embeddedStruct/pac"
 )
 
 //go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type Entity

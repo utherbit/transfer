@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer/internal"
+	"github.com/utherbit/transfer/internal"
 )
 
 func main() {

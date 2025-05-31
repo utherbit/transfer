@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer/internal/testdata/withImports/pac"
+	"github.com/utherbit/transfer/internal/testdata/withImports/pac"
 )
 
 type Entity struct {

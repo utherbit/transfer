@@ -7,7 +7,7 @@ import (
 	aliasImport "os"
 
 	"github.com/stretchr/testify/mock"
-	"klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer/internal/testdata/withImports/pac"
+	"github.com/utherbit/transfer/internal/testdata/withImports/pac"
 )
 
 //go:generate go run klad.rupu.ru/rupuru/eda/backend/cmd/gen/transfer --type Entity
