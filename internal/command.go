@@ -12,8 +12,8 @@ var TransferCMD = &cobra.Command{
 	SuggestFor: []string{"te", "fe", "re"},
 	Short:      `Generate transfer type`,
 	Long: `use command like this:
-go run github.com/utherbit/transfer--type <type name> // from working directory
-go run github.com/utherbit/transfer--ref <reference> // from project root directory
+go run github.com/utherbit/transfer --type <type name> // from working directory
+go run github.com/utherbit/transfer --ref <reference> // from project root directory
 `,
 
 	Run: run,
