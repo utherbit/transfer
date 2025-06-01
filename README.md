@@ -1,21 +1,68 @@
 # gen Transfer
 
-Генератор transfer моделей, которые позволяют обходить ограничения приватных полей
-для безопасного описания доменной логики и маппинга моделей в представления бд
+transfer is a generator for transfer models (DTOs) 
+designed to provide safe access to private fields, enabling you to:
 
-transfer модель может быть использована, что бы легально получить доступ к приватным полям,
-так как логика transfer вызывается с помощью отдельного типа, легко можно найти все использования
+- isolate domain logic without exposing the internal state of entities;
+- map domain models to storage structures (e.g., databases) without compromises;
+- easily track the usage of the transfer mechanism throughout the code.
 
+DTOs are created as separate types intended solely for data transfer. 
+The conversion logic to and from domain entities resides in one place, 
+allowing centralized updates when changes occur.
+
+> ⚠️ I recommend using this tool together with the [exhaustruct](https://golangci-lint.run/usage/linters/#exhaustruct) linter 
+> 
+> It ensures no data is lost when converting DTOs to your external types.
+When new fields are added to a domain entity, you'll be reminded to update the storage model and mapping logic.
+
+## Usage
+Install the tool:
+```shell
+go install github.com/utherbit/transfer
+```
+
+### Method 1 – Using `--ref`
+From the project root, run:
+```shell
+transfer --ref internal/testdata/example/entity.go:3
+```
+The ref points to the file and line where your type is declared.
+In modern IDEs (e.g. GoLand), you can copy such a reference with a hotkey like Ctrl + Shift + Alt + C.
+
+### Method 2 – Using `--type`
+
+Navigate to the directory containing your type:
+```shell
+cd internal/testdata/example
+```
+
+Replace Entity with the name of your type and run:
+```shell
+transfer --type Entity
+```
+See examples of the original type and the generated DTO below.
+
+### After using
+
+The generated file includes a //go:generate directive.
+You can regenerate all DTOs across your project at any time by running:
+```shell
+go generate ./...
+```
 
 ## Example
 
 File `entity.go`:
 
 ```go
+package example
+
 type Entity struct {
 	ID   int
 	name string
 }
+
 ```
 
 Generated file `entity_transfer.go`
@@ -43,3 +90,7 @@ func (t EntityDTO) Base() Entity {
 	}
 }
 ```
+
+## License
+
+Released under the [MIT Licence](./LICENSE)
