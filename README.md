@@ -3,9 +3,9 @@
 transfer is a generator for transfer models (DTOs) 
 designed to provide safe access to private fields, enabling you to:
 
-- isolate domain logic without exposing the internal state of entities;
-- map domain models to storage structures (e.g., databases) without compromises;
-- easily track the usage of the transfer mechanism throughout the code.
+- Isolate domain logic without exposing the internal state of entities;
+- Map domain models to storage structures (e.g., databases) without compromises;
+- Easily track the usage of the transfer mechanism throughout the code.
 
 DTOs are created as separate types intended solely for data transfer. 
 The conversion logic to and from domain entities resides in one place, 
